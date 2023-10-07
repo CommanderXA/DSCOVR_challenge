@@ -1,7 +1,7 @@
 import torch
 from torch.utils.data import Dataset
 
-import pandas
+import pandas as pd
 
 from .config import Config
 
@@ -10,7 +10,7 @@ class DSCOVRDataset(Dataset):
     """DSCOVR Dataset class"""
 
     def __init__(self, annotation_file: str) -> None:
-        self.data = pandas.read_csv(
+        self.data = pd.read_csv(
             annotation_file,
             delimiter=",",
             parse_dates=[0],

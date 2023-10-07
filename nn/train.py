@@ -56,12 +56,12 @@ def train(cfg: DictConfig) -> None:
     # dataset splits
     dataset = DSCOVRDataset(cfg.data.csv_file)
     train_loader = DataLoader(
-        dataset=dataset, batch_size=cfg.hyper.batch_size, shuffle=True
+        dataset=dataset, batch_size=cfg.hyper.batch_size, shuffle=False
     )
 
     logging.info(f"Training")
     model.train()
-    # train_step(model, train_loader, optimizer, scaler, cfg)
+    train_step(model, train_loader, optimizer, scaler, cfg)
 
 
 def train_step(
@@ -75,6 +75,8 @@ def train_step(
 
     finished_epochs = 0
     for epoch in range(1, cfg.hyper.epochs + 1):
+        epoch_loss: float = 0.0
+        epoch_correct: int = 0
         start: float = time.time()
 
         # tqdm bar
@@ -87,12 +89,14 @@ def train_step(
                 ):
                     # data, targets
                     x, targets = batch_sample
+                    targets = targets.unsqueeze(1)
 
                     # forward
                     logits = model(x)
 
                     # compute the loss
                     loss: torch.Tensor = F.mse_loss(logits, targets)
+                    epoch_loss += loss.item()
 
                 # backprop and optimize
                 scaler.scale(loss).backward()
@@ -103,6 +107,7 @@ def train_step(
 
                 # zero the parameter gradients
                 optimizer.zero_grad(set_to_none=True)
+                epoch_correct += logits == targets
 
         finished_epochs += 1
 
@@ -113,12 +118,24 @@ def train_step(
             "scaler": scaler.state_dict(),
             "epochs": Config.get_trained_epochs() + finished_epochs,
         }
+
+        # check if models directory does not exist
+        if not os.path.exists("models"):
+            # create it if it does not exist
+            os.mkdir("models")
+
         # save checkpoint
-        torch.save(checkpoint, f"models/{cfg.model.name}_{cfg.hyper.block_size}h.pt")
+        torch.save(checkpoint, f"models/{cfg.model.name}_{cfg.hyper.n_hidden}.pt")
+        if epoch % 10 == 0:
+            torch.save(
+                checkpoint, f"models/{cfg.model.name}_{cfg.hyper.n_hidden}_{epoch}.pt"
+            )
 
         # monitor losses
-        # if epoch % (cfg.hyper.eval_iters) == 0:
-        #     logging.info(f"Train Loss: {losses['train']}, Val Loss: {losses['val']}")
+        if epoch % (cfg.hyper.eval_iters) == 0:
+            losses = epoch_loss / len(train_loader)
+            accuracy = epoch_correct / len(train_loader) * 100
+            logging.info(f"Train Loss: {losses}, Train Accuracy: {accuracy}")
 
         end: float = time.time()
         seconds_elapsed: float = end - start

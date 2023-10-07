@@ -17,11 +17,11 @@ optim:
 hyper:
   pretrained: True
   n_layers: 2
-  n_hidden: 256
-  batch_size: 4
+  n_hidden: 128
+  batch_size: 32
   dropout: 0.2
-  lr: 3e-4
-  epochs: 10
+  lr: 1e-3
+  epochs: 20
   eval_iters: 1
   use_amp: True
 

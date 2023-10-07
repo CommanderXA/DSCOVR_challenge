@@ -1,12 +1,15 @@
 from datetime import timedelta
 
 import pandas as pd
+from tqdm import tqdm
+
+year: int = 2017
+print("Merging year: ", year)
 
 raw_data = pd.read_csv(
-    "./data/dsc_fc_summed_spectra_2016_v01.csv",
+    "./data/dsc_fc_summed_spectra_" + str(year) + "_v01.csv",
     delimiter=",",
     parse_dates=[0],
-    infer_datetime_format=True,
     na_values="0",
     header=None,
 )
@@ -15,10 +18,9 @@ raw_data = pd.read_csv(
 raw_data[54] = 0.0
 
 kp_data = pd.read_csv(
-    "./data/k_index_2016.csv",
+    "./data/k_index_" + str(year) + ".csv",
     delimiter=";",
     parse_dates=[0],
-    infer_datetime_format=True,
     na_values=0,
     header=None,
 )
@@ -53,7 +55,7 @@ def get_kp(timestamp) -> float:
 
 # iterate over the rows of raw data from the satellite and assign k-index
 # to each row that lies in the range of data from k index
-for i in range(len(raw_data)):
+for i in tqdm(range(len(raw_data))):
     rd = raw_data.iloc[i]
     kp = get_kp(rd[0].to_pydatetime())
     if kp == None:
@@ -64,4 +66,4 @@ for i in range(len(raw_data)):
 # delete all rows that were not in the range
 raw_data = raw_data[raw_data[54] > -1]
 print(raw_data[0:100])
-raw_data.to_csv("./data/data_2016.csv", header=False, index=False)
+raw_data.to_csv("./data/data_" + str(year) + ".csv", header=False, index=False)

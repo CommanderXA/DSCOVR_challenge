@@ -13,7 +13,7 @@ class DSCOVRYModel(nn.Module):
         self.linear1 = nn.Linear(in_features=128, out_features=256)
         self.linear2 = nn.Linear(in_features=256, out_features=256)
         self.lstm = nn.LSTM(
-            in_features=256, hidden_size=256, num_layers=2, batch_first=True
+            input_size=256, hidden_size=256, num_layers=2, batch_first=True
         )
         self.linear3 = nn.Linear(in_features=256, out_features=64)
         self.linear4 = nn.Linear(in_features=64, out_features=1)
@@ -25,3 +25,6 @@ class DSCOVRYModel(nn.Module):
         x = F.relu(self.dropout(self.linear3(x)))
         x = F.relu(self.linear4(x))
         return x
+
+    def get_parameters_amount(self) -> int:
+        return sum(p.numel() for p in self.parameters())

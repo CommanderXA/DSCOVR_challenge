@@ -21,7 +21,7 @@ class DSCOVRYModel(nn.Module):
         self.lstm = nn.LSTM(
             input_size=Config.cfg.hyper.n_hidden,
             hidden_size=Config.cfg.hyper.n_hidden,
-            num_layers=2,
+            num_layers=Config.cfg.hyper.n_layers,
             batch_first=True,
         )
         self.linear3 = nn.Linear(in_features=Config.cfg.hyper.n_hidden, out_features=64)

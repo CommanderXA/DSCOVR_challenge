@@ -1,12 +1,16 @@
 import logging
 
 import torch
+import torch.nn.functional as F
+from torch.utils.data import DataLoader
 
 import hydra
 from omegaconf import DictConfig
+from tqdm import tqdm
 
 from dscovry.config import Config
 from dscovry.model import DSCOVRYModel
+from dscovry.dataset import DSCOVRDataset
 
 
 @hydra.main(version_base=None, config_path="conf", config_name="config")
@@ -27,7 +31,30 @@ def my_app(cfg: DictConfig) -> None:
         f"Model parameters amount: {model.get_parameters_amount():,} (Trained on {checkpoint['epochs']} epochs)"
     )
 
-    # define the logic
+    # dataset
+    dataset = DSCOVRDataset(cfg.data.csv_file)
+    train_loader = DataLoader(
+        dataset=dataset, batch_size=cfg.hyper.batch_size, shuffle=False
+    )
+
+    with tqdm(iter(train_loader)) as tepoch:
+        for batch_sample in tepoch:
+            # enable mixed precision
+            with torch.autocast(
+                device_type="cuda", dtype=torch.float16, enabled=cfg.hyper.use_amp
+            ):
+                # data, targets
+                x, targets = batch_sample
+                targets = targets.unsqueeze(1)
+
+                # forward
+                logits = model(x)
+
+                # compute the loss
+                loss: torch.Tensor = F.mse_loss(logits, targets)
+                print(targets)
+                print(logits)
+                print(loss.item())
 
     print()
 

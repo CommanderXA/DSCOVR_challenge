@@ -44,7 +44,7 @@ def predict_day():
     for t, x, y1, y2 in stream:
         dt = datetime.fromtimestamp(t.item())
         if dt > datetime(2023, 1, 1) + timedelta(days=day):
-            kp = forward(current_app.config["model"], x).item()
+            kp1, kp2 = forward(current_app.config["model"], x)
             day += 1
 
             return jsonify(
@@ -52,12 +52,12 @@ def predict_day():
                     "timestamp": datetime.fromtimestamp(t.item()),
                     "prediction": [
                         {
-                            "kp": kp,
+                            "kp": kp1.item(),
                             "ground_truth": y1.item(),
                             "eta": 15,
                         },
                         {
-                            "kp": random.randint(0, 9),
+                            "kp": kp2.item(),
                             "ground_truth": y2.item(),
                             "eta": 180,
                         },

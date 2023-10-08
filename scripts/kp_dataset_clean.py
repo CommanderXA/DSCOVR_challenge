@@ -1,5 +1,5 @@
-fin = open("./data/kp2017.txt", "r")
-fout = open("./data/kp2017.csv", "w")
+fin = open("./data/k_index_2023.txt", "r")
+fout = open("./data/k_index_2023.csv", "w")
 
 a = fin.readline()
 

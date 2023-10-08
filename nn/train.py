@@ -18,24 +18,43 @@ from dscovry.model import DSCOVRYModel
 from dscovry.config import Config
 
 
+@torch.no_grad
+def evaluate_accuracy(
+    logits: torch.Tensor, targets: torch.Tensor, tolerance: float
+) -> float:
+    diff = torch.abs(logits - targets)
+    tolerated = diff <= tolerance
+    correct = torch.sum(tolerated, dim=0).item()
+    sample = targets.size(0)
+    accuracy = 100 * (correct / sample)
+    return accuracy
+
+
 @hydra.main(version_base=None, config_path="conf", config_name="config")
 def train(cfg: DictConfig) -> None:
     log = logging.getLogger(__name__)
     Config.setup(cfg, log)
-    # dtype = "bfloat16"
-    # ptdtype = {
-    #     "float32": torch.float32,
-    #     "bfloat16": torch.bfloat16,
-    #     "float16": torch.float16,
-    # }[dtype]
-    # torch.amp.autocast(device_type="cuda", dtype=ptdtype)
+
+    if Config.cfg.hyper.use_amp:
+        torch.set_float32_matmul_precision("high")
+        torch.backends.cudnn.allow_tf32 = True
+        torch.backends.cuda.matmul.allow_tf32 = True
 
     # loading the model
     model = DSCOVRYModel().to(Config.device)
-    model = torch.compile(model)
+
+    if Config.cfg.hyper.use_amp:
+        dtype = "bfloat16"
+        ptdtype = {
+            "float32": torch.float32,
+            "bfloat16": torch.bfloat16,
+            "float16": torch.float16,
+        }[dtype]
+        torch.amp.autocast(device_type="cuda", dtype=ptdtype)
+        model = torch.compile(model)
 
     # optimizers
-    # scaler = GradScaler(enabled=cfg.hyper.use_amp)
+    scaler = GradScaler(enabled=cfg.hyper.use_amp)
     optimizer = AdamW(
         model.parameters(), lr=cfg.hyper.lr, betas=(cfg.optim.beta1, cfg.optim.beta2)
     )
@@ -46,9 +65,9 @@ def train(cfg: DictConfig) -> None:
         checkpoint = torch.load(f"models/{cfg.model.name}_{cfg.hyper.n_hidden}.pt")
         model.load_state_dict(checkpoint["model"])
         optimizer.load_state_dict(checkpoint["optimizer"])
-        # scaler.load_state_dict(checkpoint["scaler"])
+        scaler.load_state_dict(checkpoint["scaler"])
         Config.set_trained_epochs(checkpoint["epochs"])
-    # model.load_state_dict(torch.load(f"models/{cfg.model.name}_{cfg.hyper.n_hidden}.pt"))
+
     logging.info(
         f"Model parameters amount: {model.get_parameters_amount():,} (Trained on {Config.get_trained_epochs()} epochs)"
     )
@@ -61,14 +80,14 @@ def train(cfg: DictConfig) -> None:
 
     logging.info(f"Training")
     model.train()
-    train_step(model, train_loader, optimizer, cfg)
+    train_step(model, train_loader, optimizer, scaler, cfg)
 
 
 def train_step(
     model: DSCOVRYModel,
     train_loader: DataLoader,
     optimizer: AdamW,
-    # scaler: GradScaler,
+    scaler: GradScaler,
     cfg: DictConfig,
 ) -> None:
     """Performs actual training"""
@@ -76,7 +95,7 @@ def train_step(
     finished_epochs = 0
     for epoch in range(1, cfg.hyper.epochs + 1):
         epoch_loss: float = 0.0
-        epoch_correct: int = 0
+        epoch_accuracy: float = 0.0
         start: float = time.time()
 
         # tqdm bar
@@ -97,20 +116,19 @@ def train_step(
                     # compute the loss
                     loss: torch.Tensor = F.mse_loss(logits, targets)
                     epoch_loss += loss.item()
-                    print(targets)
-                    print(logits)
-                    print(loss.item())
 
                 # backprop and optimize
-                # scaler.scale(loss).backward()
-                # scaler.step(optimizer)
-                # scaler.update()
-                loss.backward()
-                optimizer.step()
+                if Config.cfg.hyper.use_amp:
+                    scaler.scale(loss).backward()
+                    scaler.step(optimizer)
+                    scaler.update()
+                else:
+                    loss.backward()
+                    optimizer.step()
 
                 # zero the parameter gradients
                 optimizer.zero_grad(set_to_none=True)
-                epoch_correct += (logits == targets).float().sum().item()
+                epoch_accuracy += evaluate_accuracy(logits, targets, Config.cfg.hyper.tolerance)
 
         finished_epochs += 1
 
@@ -118,7 +136,7 @@ def train_step(
         checkpoint = {
             "model": model.state_dict(),
             "optimizer": optimizer.state_dict(),
-            # "scaler": scaler.state_dict(),
+            "scaler": scaler.state_dict(),
             "epochs": Config.get_trained_epochs() + finished_epochs,
         }
 
@@ -128,17 +146,17 @@ def train_step(
             os.mkdir("models")
 
         # save checkpoint
-        torch.save(checkpoint, f"models/{cfg.model.name}_{cfg.hyper.n_hidden}_2.pt")
-        if epoch % 10 == 0:
+        torch.save(checkpoint, f"models/{cfg.model.name}_{cfg.hyper.n_hidden}.pt")
+        if epoch % 50 == 0:
             torch.save(
-                checkpoint, f"models/{cfg.model.name}_{cfg.hyper.n_hidden}_{epoch}_2.pt"
+                checkpoint, f"models/{cfg.model.name}_{cfg.hyper.n_hidden}_{epoch}.pt"
             )
 
         # monitor losses
         if epoch % (cfg.hyper.eval_iters) == 0:
             losses = epoch_loss / len(train_loader)
-            accuracy = 100 * epoch_correct / len(train_loader)
-            logging.info(f"Train Loss: {losses}, Train Accuracy: {accuracy:.2f}")
+            accuracy = epoch_accuracy / len(train_loader)
+            logging.info(f"Train Loss: {losses}, Train Accuracy: {accuracy:.2f}%")
 
         end: float = time.time()
         seconds_elapsed: float = end - start
@@ -150,8 +168,4 @@ def train_step(
 if __name__ == "__main__":
     # torch.manual_seed(42)
     # torch.multiprocessing.set_start_method("spawn")
-
-    # torch.set_float32_matmul_precision("high")
-    # torch.backends.cudnn.allow_tf32 = True
-    # torch.backends.cuda.matmul.allow_tf32 = True
     train()

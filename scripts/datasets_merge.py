@@ -3,7 +3,7 @@ from datetime import timedelta
 import pandas as pd
 from tqdm import tqdm
 
-year: int = 2017
+year: int = 2023
 print("Merging year: ", year)
 
 raw_data = pd.read_csv(

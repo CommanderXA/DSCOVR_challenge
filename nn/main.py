@@ -20,7 +20,7 @@ def my_app(cfg: DictConfig) -> None:
 
     # model
     model = DSCOVRYModel().to(Config.device)
-    model = torch.compile(model)
+    # model = torch.compile(model)
 
     # load the model
     checkpoint = torch.load(f"models/{cfg.model.name}_{cfg.hyper.n_hidden}.pt")
@@ -34,11 +34,11 @@ def my_app(cfg: DictConfig) -> None:
     # dataset
     dataset = DSCOVRDataset(cfg.data.csv_file)
     train_loader = DataLoader(
-        dataset=dataset, batch_size=cfg.hyper.batch_size, shuffle=False
+        dataset=dataset, batch_size=cfg.hyper.batch_size, shuffle=True
     )
 
-    with tqdm(iter(train_loader)) as tepoch:
-        for batch_sample in tepoch:
+    with tqdm(enumerate(iter(train_loader))) as tepoch:
+        for i, batch_sample in tepoch:
             # enable mixed precision
             with torch.autocast(
                 device_type="cuda", dtype=torch.float16, enabled=cfg.hyper.use_amp
@@ -52,9 +52,10 @@ def my_app(cfg: DictConfig) -> None:
 
                 # compute the loss
                 loss: torch.Tensor = F.mse_loss(logits, targets)
-                print(targets)
-                print(logits)
-                print(loss.item())
+
+                print("Loss: ", loss.item())
+                if i > 1:
+                    break
 
     print()
 

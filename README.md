@@ -4,8 +4,59 @@ NASA SpaceAppsChallenge: Develop the Oracle of DSCOVR
 
 ## Requirements
 
-* python >= 3.10
-* npm >= 9.2.0
+- python >= 3.10
+- npm >= 9.2.0
+
+## To run
+
+- Create virtual environment:
+
+```sh
+python3 -m venv ./venv
+```
+
+- Activate the environment
+
+  - for linux:
+
+  ```sh
+  source ./venv/bin/activate
+  ```
+
+  - for windows:
+
+  ```sh
+  .\venv\activate
+  ```
+
+- Install the dependencies:
+
+  - python:
+
+  ```sh
+  pip install -r requirements.txt
+  ```
+
+  - npm:
+
+  ```sh
+  npm i
+  ```
+
+- Download [data](https://github.com/CommanderXA/dscovry/releases/tag/data) and place it inside `/data` directory _*(create it beforehand)*_ in the project root.
+- Download [model](https://github.com/CommanderXA/dscovry/releases/tag/model) and place it inside `/models` directory _(create it beforehand)_ in the project root.
+
+- Run server:
+
+```sh
+python run.py
+```
+
+- Run client:
+
+```sh
+npm start
+```
 
 ## Project structure
 

@@ -37,7 +37,7 @@ python3 -m venv ./venv
   pip install -r requirements.txt
   ```
 
-  - npm:
+  - npm (open the second terminal):
 
   ```sh
   cd ./client && npm i
@@ -52,10 +52,24 @@ python3 -m venv ./venv
 python run.py
 ```
 
-- Run client:
+- Run client in the 2nd terminal:
 
 ```sh
-cd ./client && npm start
+npm start
+```
+
+## Using Neural Network
+
+- To train: specify data in `/nn/conf/config.yaml` and run:
+
+```sh
+python ./nn/train.py
+```
+
+- To validate: specify data in `/nn/main.py` and run:
+
+```sh
+python ./nn/main.py
 ```
 
 ## Project structure

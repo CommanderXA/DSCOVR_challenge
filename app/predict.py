@@ -24,7 +24,12 @@ def predict_now():
                     "kp": kp,
                     "ground_truth": sample[2].item(),
                     "eta": 15,
-                }
+                },
+                {
+                    "kp": random.randint(0, 9),
+                    "ground_truth": random.randint(0, 9),
+                    "eta": 180,
+                },
             ],
         }
     )
@@ -51,7 +56,12 @@ def predict_day():
                             "kp": kp,
                             "ground_truth": y.item(),
                             "eta": 15,
-                        }
+                        },
+                        {
+                            "kp": random.randint(0, 9),
+                            "ground_truth": random.randint(0, 9),
+                            "eta": 180,
+                        },
                     ],
                 }
             )

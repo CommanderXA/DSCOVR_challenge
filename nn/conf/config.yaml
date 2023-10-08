@@ -3,7 +3,7 @@ defaults:
   - override hydra/hydra_logging: disabled
 
 data:
-  csv_file: "./data/data_2017.csv"
+  csv_files: ["./data/data_2016.csv", "./data/data_2017.csv"]
 
 model:
   name: "dscovry"
@@ -20,23 +20,23 @@ hyper:
   n_hidden: 256
   batch_size: 128
   dropout: 0.2
-  lr: 1e-4
+  lr: 3e-4
   epochs: 5
   eval_iters: 1
   use_amp: False
   tolerance: 0.7
 
 # hydra customizations
-hydra:  
-  output_subdir: null  
-  run:  
+hydra:
+  output_subdir: null
+  run:
     dir: .
   job_logging:
     disable_existing_loggers: true
     version: 1
     formatters:
       colorlog:
-        '()': 'colorlog.ColoredFormatter'
+        "()": "colorlog.ColoredFormatter"
         format: "[%(cyan)s%(asctime)s%(reset)s][%(green)s%(levelname)s%(reset)s] %(message)s"
     handlers:
       console:

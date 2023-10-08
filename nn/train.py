@@ -73,7 +73,7 @@ def train(cfg: DictConfig) -> None:
     )
 
     # dataset
-    dataset = DSCOVRDataset(cfg.data.csv_file)
+    dataset = DSCOVRDataset(cfg.data.csv_files)
     train_loader = DataLoader(
         dataset=dataset, batch_size=cfg.hyper.batch_size, shuffle=False
     )

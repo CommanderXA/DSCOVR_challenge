@@ -9,14 +9,20 @@ from .config import Config
 class DSCOVRDataset(Dataset):
     """DSCOVR Dataset class"""
 
-    def __init__(self, annotation_file: str) -> None:
-        self.data = pd.read_csv(
-            annotation_file,
-            delimiter=",",
-            parse_dates=[0],
-            na_values="0",
-            header=None,
-        )
+    def __init__(self, annotation_files: list[str]) -> None:
+        data = []
+        for i, file in enumerate(annotation_files):
+            data.append(
+                pd.read_csv(
+                    file,
+                    delimiter=",",
+                    parse_dates=[0],
+                    na_values="0",
+                    header=None,
+                )
+            )
+        self.data = pd.concat(data, axis=0, ignore_index=True)
+        print(len(self.data))
 
     def __len__(self) -> int:
         return len(self.data)

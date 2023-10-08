@@ -20,9 +20,9 @@ hyper:
   n_hidden: 256
   batch_size: 128
   dropout: 0.2
-  lr: 3e-3
+  lr: 3e-4
   epochs: 10
-  eval_iters: 1
+  eval_iters: 2
   use_amp: False
   tolerance: 1.0
 

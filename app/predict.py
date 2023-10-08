@@ -14,20 +14,19 @@ def predict_now():
     stream = current_app.config["stream"]
     sample = next(stream)
     data = sample[1]
-    print(sample[0])
-    kp = forward(current_app.config["model"], data).item()
+    kp1, kp2 = forward(current_app.config["model"], data)
     return jsonify(
         {
             "timestamp": datetime.fromtimestamp(sample[0].item()),
             "prediction": [
                 {
-                    "kp": kp,
+                    "kp": kp1.item(),
                     "ground_truth": sample[2].item(),
                     "eta": 15,
                 },
                 {
-                    "kp": random.randint(0, 9),
-                    "ground_truth": random.randint(0, 9),
+                    "kp": kp2.item(),
+                    "ground_truth": sample[3].item(),
                     "eta": 180,
                 },
             ],
@@ -42,7 +41,7 @@ day = 1
 def predict_day():
     global day
     stream = current_app.config["stream"]
-    for t, x, y in stream:
+    for t, x, y1, y2 in stream:
         dt = datetime.fromtimestamp(t.item())
         if dt > datetime(2023, 1, 1) + timedelta(days=day):
             kp = forward(current_app.config["model"], x).item()
@@ -54,12 +53,12 @@ def predict_day():
                     "prediction": [
                         {
                             "kp": kp,
-                            "ground_truth": y.item(),
+                            "ground_truth": y1.item(),
                             "eta": 15,
                         },
                         {
                             "kp": random.randint(0, 9),
-                            "ground_truth": random.randint(0, 9),
+                            "ground_truth": y2.item(),
                             "eta": 180,
                         },
                     ],

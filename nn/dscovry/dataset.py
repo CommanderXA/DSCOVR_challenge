@@ -27,15 +27,16 @@ class DSCOVRDataset(Dataset):
     def __len__(self) -> int:
         return len(self.data)
 
-    def __getitem__(self, idx: int) -> (torch.Tensor, torch.Tensor):
+    def __getitem__(self, idx: int) -> (torch.Tensor, torch.Tensor, torch.Tensor):
         row = self.data.iloc[idx]
         X = torch.tensor(
             self.data.iloc[idx, 1:54].fillna(0).values,
             dtype=torch.float32,
             device=Config.device,
         )
-        Y = torch.tensor(row[54], dtype=torch.float32, device=Config.device)
-        return X, Y
+        Y1 = torch.tensor(row[54], dtype=torch.float32, device=Config.device)
+        Y2 = torch.tensor(row[55], dtype=torch.float32, device=Config.device)
+        return X, Y1, Y2
 
 
 class DSCOVRSimulation(Dataset):
@@ -58,7 +59,9 @@ class DSCOVRSimulation(Dataset):
     def __len__(self) -> int:
         return len(self.data)
 
-    def __getitem__(self, idx: int) -> (datetime, torch.Tensor, torch.Tensor):
+    def __getitem__(
+        self, idx: int
+    ) -> (float, torch.Tensor, torch.Tensor, torch.Tensor):
         row = self.data.iloc[idx]
         T = self.data.iloc[idx, 0].to_pydatetime().timestamp()
         X = torch.tensor(
@@ -66,5 +69,6 @@ class DSCOVRSimulation(Dataset):
             dtype=torch.float32,
             device=Config.device,
         )
-        Y = torch.tensor(row[54], dtype=torch.float32, device=Config.device)
-        return T, X, Y
+        Y1 = torch.tensor(row[54], dtype=torch.float32, device=Config.device)
+        Y2 = torch.tensor(row[55], dtype=torch.float32, device=Config.device)
+        return T, X, Y1, Y2

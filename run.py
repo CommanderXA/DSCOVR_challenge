@@ -1,10 +1,11 @@
 import logging
-from flask_cors import CORS
 
 import hydra
 from omegaconf import DictConfig
 
 import torch
+
+from flask_cors import CORS
 
 from app import create_app
 
@@ -20,7 +21,7 @@ def run(cfg: DictConfig) -> None:
     model = DSCOVRYModel().to(Config.device)
     # load the model
     checkpoint = torch.load(
-        f"models/{cfg.model.name}_{cfg.hyper.n_hidden}.pt", map_location=Config.device
+        f"models/{cfg.model.name}_{cfg.hyper.n_hidden}_2m.pt", map_location=Config.device
     )
     model.load_state_dict(checkpoint["model"])
     model.eval()

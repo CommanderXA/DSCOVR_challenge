@@ -2,6 +2,11 @@
 
 NASA SpaceAppsChallenge: Develop the Oracle of DSCOVR
 
+## Requirements
+
+* python >= 3.10
+* npm >= 
+
 ## Project structure
 
 This project encorporates:

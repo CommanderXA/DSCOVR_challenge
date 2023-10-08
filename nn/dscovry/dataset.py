@@ -37,6 +37,7 @@ class DSCOVRDataset(Dataset):
         Y = torch.tensor(row[54], dtype=torch.float32, device=Config.device)
         return X, Y
 
+
 class DSCOVRSimulation(Dataset):
     """DSCOVR data simulation class"""
 

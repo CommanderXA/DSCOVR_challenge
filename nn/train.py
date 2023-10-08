@@ -16,18 +16,7 @@ from omegaconf import DictConfig
 from dscovry.dataset import DSCOVRDataset
 from dscovry.model import DSCOVRYModel
 from dscovry.config import Config
-
-
-@torch.no_grad
-def evaluate_accuracy(
-    logits: torch.Tensor, targets: torch.Tensor, tolerance: float
-) -> float:
-    diff = torch.abs(logits - targets)
-    tolerated = diff <= tolerance
-    correct = torch.sum(tolerated, dim=0).item()
-    sample = targets.size(0)
-    accuracy = 100 * (correct / sample)
-    return accuracy
+from .utils import evaluate_accuracy
 
 
 @hydra.main(version_base=None, config_path="conf", config_name="config")
@@ -51,7 +40,7 @@ def train(cfg: DictConfig) -> None:
             "float16": torch.float16,
         }[dtype]
         torch.amp.autocast(device_type="cuda", dtype=ptdtype)
-        model = torch.compile(model)
+        # model = torch.compile(model)
 
     # optimizers
     scaler = GradScaler(enabled=cfg.hyper.use_amp)

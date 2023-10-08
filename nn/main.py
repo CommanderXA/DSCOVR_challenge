@@ -11,6 +11,7 @@ from tqdm import tqdm
 from dscovry.config import Config
 from dscovry.model import DSCOVRYModel
 from dscovry.dataset import DSCOVRDataset
+from utils import evaluate_accuracy
 
 
 @hydra.main(version_base=None, config_path="conf", config_name="config")
@@ -23,7 +24,7 @@ def my_app(cfg: DictConfig) -> None:
     # model = torch.compile(model)
 
     # load the model
-    checkpoint = torch.load(f"models/{cfg.model.name}_{cfg.hyper.n_hidden}.pt")
+    checkpoint = torch.load(f"models/{cfg.model.name}_{cfg.hyper.n_hidden}_a.pt")
     model.load_state_dict(checkpoint["model"])
     model.eval()
 
@@ -32,13 +33,22 @@ def my_app(cfg: DictConfig) -> None:
     )
 
     # dataset
-    dataset = DSCOVRDataset(cfg.data.csv_files)
-    train_loader = DataLoader(
-        dataset=dataset, batch_size=cfg.hyper.batch_size, shuffle=True
+    dataset = DSCOVRDataset(["./data/data_2023.csv"])
+    dataloader = DataLoader(
+        dataset=dataset, batch_size=cfg.hyper.batch_size, shuffle=False
     )
 
-    with tqdm(enumerate(iter(train_loader))) as tepoch:
-        for i, batch_sample in tepoch:
+    # evaluation
+    evaluate(model, dataloader, cfg)
+
+
+@torch.no_grad
+def evaluate(model: DSCOVRYModel, dataloader: DataLoader, cfg):
+    epoch_accuracy = 0
+    epoch_loss = 0
+    with tqdm(iter(dataloader)) as tepoch:
+        tepoch.set_description("Evaluating")
+        for batch_sample in tepoch:
             # enable mixed precision
             with torch.autocast(
                 device_type="cuda", dtype=torch.float16, enabled=cfg.hyper.use_amp
@@ -52,12 +62,15 @@ def my_app(cfg: DictConfig) -> None:
 
                 # compute the loss
                 loss: torch.Tensor = F.mse_loss(logits, targets)
+                epoch_accuracy += evaluate_accuracy(
+                    logits, targets, Config.cfg.hyper.tolerance
+                )
+                epoch_loss += loss.item()
 
-                print("Loss: ", loss.item())
-                if i > 1:
-                    break
-
-    print()
+    accuracy = epoch_accuracy / len(dataloader)
+    loss = epoch_loss / len(dataloader)
+    print(f"Accuracy ({Config.cfg.hyper.tolerance} tolearnce): {accuracy}%")
+    print(f"Loss: {loss}")
 
 
 if __name__ == "__main__":

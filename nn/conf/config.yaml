@@ -24,7 +24,7 @@ hyper:
   epochs: 10
   eval_iters: 1
   use_amp: False
-  tolerance: 0.7
+  tolerance: 1.0
 
 # hydra customizations
 hydra:

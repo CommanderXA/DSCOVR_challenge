@@ -19,7 +19,7 @@ def run(cfg: DictConfig) -> None:
 
     model = DSCOVRYModel().to(Config.device)
     # load the model
-    checkpoint = torch.load(f"models/{cfg.model.name}_{cfg.hyper.n_hidden}_0.pt")
+    checkpoint = torch.load(f"models/{cfg.model.name}_{cfg.hyper.n_hidden}.pt")
     model.load_state_dict(checkpoint["model"])
     model.eval()
 

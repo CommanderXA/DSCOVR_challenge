@@ -39,6 +39,23 @@ We have used 2 scripts to clean the data, they are located in the `/scripts` dir
 - `kp_dataset_clean.py` used to clean the Kp indices data that contained a lot of unrelevant data to the problem in the first place. It also produces well structured file with the delimeters, makeing it possible for `pandas` to open it.
 - `datasets_merge.py` iterates over the satellite raw data, for each entry it then iterates over the Kp indices data and if the entry is in range of time measurement of any Kp index, then it adds the Kp index column to the entry.
 
+## Model Architecture
+
+DSCIVR(Y) model has 53 inputs and 1 output.
+It has 1,175,681 parameters.
+
+The architecture:
+
+- linear (53, 128)
+- batch_norm (128)
+- linear1 (128, 256)
+- batch_norm (256)
+- linear2 (256, 256)
+- batch_norm (256)
+- lstm (256, 256, 2 layers)
+- linear3 (256, 64)
+- linear4 (64, 1)
+
 ## License
 
 Plantary k-index data is subjected to `CC BY 4.0` [license](https://creativecommons.org/licenses/by/4.0/).

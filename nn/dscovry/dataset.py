@@ -53,7 +53,6 @@ class DSCOVRSimulation(Dataset):
                 )
             )
         self.data = pd.concat(data, axis=0, ignore_index=True)
-        print(len(self.data))
 
     def __len__(self) -> int:
         return len(self.data)

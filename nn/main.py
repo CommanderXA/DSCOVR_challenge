@@ -24,7 +24,7 @@ def my_app(cfg: DictConfig) -> None:
     # model = torch.compile(model)
 
     # load the model
-    checkpoint = torch.load(f"models/{cfg.model.name}_{cfg.hyper.n_hidden}_a.pt")
+    checkpoint = torch.load(f"models/{cfg.model.name}_{cfg.hyper.n_hidden}.pt")
     model.load_state_dict(checkpoint["model"])
     model.eval()
 
@@ -69,8 +69,9 @@ def evaluate(model: DSCOVRYModel, dataloader: DataLoader, cfg):
 
     accuracy = epoch_accuracy / len(dataloader)
     loss = epoch_loss / len(dataloader)
-    print(f"Accuracy ({Config.cfg.hyper.tolerance} tolearnce): {accuracy}%")
-    print(f"Loss: {loss}")
+    print(f"\n|\n| Accuracy: {accuracy:.2f}%")
+    print(f"| Accuracy tolerance: {Config.cfg.hyper.tolerance}")
+    print(f"| Loss: {loss}\n|\n")
 
 
 if __name__ == "__main__":

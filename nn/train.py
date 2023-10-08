@@ -49,9 +49,9 @@ def train(cfg: DictConfig) -> None:
     )
 
     if cfg.hyper.pretrained and os.path.exists(
-        f"models/{cfg.model.name}_{cfg.hyper.n_hidden}_2m.pt"
+        f"models/{cfg.model.name}_{cfg.hyper.n_hidden}.pt"
     ):
-        checkpoint = torch.load(f"models/{cfg.model.name}_{cfg.hyper.n_hidden}_2m.pt")
+        checkpoint = torch.load(f"models/{cfg.model.name}_{cfg.hyper.n_hidden}.pt")
         model.load_state_dict(checkpoint["model"])
         optimizer.load_state_dict(checkpoint["optimizer"])
         scaler.load_state_dict(checkpoint["scaler"])
@@ -199,10 +199,10 @@ def train_step(
             os.mkdir("models")
 
         # save checkpoint
-        torch.save(checkpoint, f"models/{cfg.model.name}_{cfg.hyper.n_hidden}_2m.pt")
+        torch.save(checkpoint, f"models/{cfg.model.name}_{cfg.hyper.n_hidden}.pt")
         if epoch % 10 == 0:
             torch.save(
-                checkpoint, f"models/{cfg.model.name}_{cfg.hyper.n_hidden}_{epoch}_2m.pt"
+                checkpoint, f"models/{cfg.model.name}_{cfg.hyper.n_hidden}_{epoch}.pt"
             )
 
         # monitor losses

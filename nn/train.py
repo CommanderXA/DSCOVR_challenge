@@ -147,7 +147,7 @@ def train_step(
 
         # save checkpoint
         torch.save(checkpoint, f"models/{cfg.model.name}_{cfg.hyper.n_hidden}.pt")
-        if epoch % 50 == 0:
+        if epoch % 10 == 0:
             torch.save(
                 checkpoint, f"models/{cfg.model.name}_{cfg.hyper.n_hidden}_{epoch}.pt"
             )

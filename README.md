@@ -2,6 +2,15 @@
 
 NASA SpaceAppsChallenge: Develop the Oracle of DSCOVR
 
+## Project structure
+
+This project encorporates:
+
+- `/app` - _*Backend*_
+- `/nn` - _*Deep Learning model*_
+
+Backend is written in Flask and the Deep Learning Model that we called `DSCOVR(Y)` was developed in PyTorch.
+
 ## Data
 
 Our Deep Learning model had been trained on data from 2 datasets that we merged together:
@@ -13,15 +22,6 @@ Short names for datasets:
 
 - `RDS_D` - _*raw data from the satellite dataset*_
 - `KP_D` - _*planetary k-index dataset*_
-
-## Project structure
-
-This project encorporates:
-
-- `/app` - _*Backend*_
-- `/nn` - _*Deep Learning model*_
-
-Backend is written in Flask and the Deep Learning Model that we called `DSCOVR(Y)` was developed in PyTorch.
 
 ## Data Cleaning
 

@@ -1,12 +1,12 @@
-import os
-
-import torch
 from flask import Flask
+
+from nn.dscovry.model import DSCOVRYModel
+from nn.inference import stream_simulation
 
 from . import predict
 
 
-def create_app(model, test_config=None):
+def create_app(model: DSCOVRYModel, test_config=None):
 
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
@@ -15,6 +15,7 @@ def create_app(model, test_config=None):
         DATABASE=None
     )
     app.config["model"] = model
+    app.config["stream"] = stream_simulation()
 
     if test_config is None:
         # load the instance config, if it exists, when not testing

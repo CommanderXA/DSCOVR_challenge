@@ -40,7 +40,7 @@ python3 -m venv ./venv
   - npm:
 
   ```sh
-  npm i
+  cd ./client && npm i
   ```
 
 - Download [data](https://github.com/CommanderXA/dscovry/releases/tag/data) and place it inside `/data` directory _*(create it beforehand)*_ in the project root.
@@ -55,7 +55,7 @@ python run.py
 - Run client:
 
 ```sh
-npm start
+cd ./client && npm start
 ```
 
 ## Project structure

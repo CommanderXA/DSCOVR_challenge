@@ -16,7 +16,7 @@ from omegaconf import DictConfig
 from dscovry.dataset import DSCOVRDataset
 from dscovry.model import DSCOVRYModel
 from dscovry.config import Config
-from .utils import evaluate_accuracy
+from utils import evaluate_accuracy
 
 
 @hydra.main(version_base=None, config_path="conf", config_name="config")

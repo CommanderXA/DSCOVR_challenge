@@ -1,0 +1,14 @@
+.image__container {
+  height: 320px;
+  width: 512px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  &__2 {
+    height: 320px;
+    width: 512px;
+    outline: 3px solid #dedede;
+    border-radius: 32px;
+  }
+}

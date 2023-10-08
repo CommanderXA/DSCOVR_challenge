@@ -29,7 +29,7 @@ def my_app(cfg: DictConfig) -> None:
     model.load_state_dict(checkpoint["model"])
 
     model.eval()
-    model.block.dropout.train()
+    model.train()
 
     logging.info(
         f"Model parameters amount: {model.get_parameters_amount():,} (Trained on {checkpoint['epochs']} epochs)"
@@ -66,13 +66,14 @@ def evaluate(model: DSCOVRYModel, dataloader: DataLoader, cfg):
                 logits1, logits2 = model(x)
 
                 # compute the loss
-                loss: torch.Tensor = F.mse_loss(logits1, targets1)
-                loss += F.mse_loss(logits2, targets2)
+                loss: torch.Tensor = F.mse_loss(logits1, targets1) + F.mse_loss(
+                    logits2, targets2
+                )
                 epoch_now_accuracy += evaluate_accuracy(
                     logits1, targets1, Config.cfg.hyper.tolerance
                 )
                 epoch_future_accuracy += evaluate_accuracy(
-                    logits1, targets1, Config.cfg.hyper.tolerance
+                    logits2, targets2, Config.cfg.hyper.tolerance
                 )
                 epoch_loss += loss.item()
 

@@ -29,13 +29,14 @@ def my_app(cfg: DictConfig) -> None:
     model.load_state_dict(checkpoint["model"])
 
     model.eval()
+    model.block.dropout.train()
 
     logging.info(
         f"Model parameters amount: {model.get_parameters_amount():,} (Trained on {checkpoint['epochs']} epochs)"
     )
 
     # dataset
-    dataset = DSCOVRDataset(["./data/data2_2023.csv"])
+    dataset = DSCOVRDataset(["./data/data_2023.csv"])
     dataloader = DataLoader(
         dataset=dataset, batch_size=cfg.hyper.batch_size, shuffle=False
     )
